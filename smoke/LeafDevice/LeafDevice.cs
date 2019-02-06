@@ -16,6 +16,7 @@ namespace LeafDeviceTest
             string edgeHostName,
             string edgeDeviceId,
             bool useWebSockets,
+            Option<string> proxy,
             Option<DeviceCertificate> deviceCertificate,
             Option<IList<string>> thumbprintCertificates)
             : base(
@@ -26,6 +27,7 @@ namespace LeafDeviceTest
                 edgeHostName,
                 edgeDeviceId,
                 useWebSockets,
+                proxy,
                 deviceCertificate,
                 thumbprintCertificates)
         {
@@ -64,6 +66,7 @@ namespace LeafDeviceTest
             readonly string edgeHostName;
             readonly string edgeDeviceId;
             readonly bool useWebSockets;
+            Option<string> proxy;
             bool usePrimaryThumbprintClientCert;
             Option<string> x509CACertPath;
             Option<string> x509CAKeyPath;
@@ -76,7 +79,8 @@ namespace LeafDeviceTest
                 string trustedCACertificateFileName,
                 string edgeHostName,
                 string edgeDeviceId,
-                bool useWebSockets)
+                bool useWebSockets,
+                Option<string> proxy)
             {
                 this.iothubConnectionString = Preconditions.CheckNotNull(iothubConnectionString);
                 this.eventhubCompatibleEndpointWithEntityPath = Preconditions.CheckNotNull(eventhubCompatibleEndpointWithEntityPath);
@@ -85,6 +89,7 @@ namespace LeafDeviceTest
                 this.edgeHostName = Preconditions.CheckNotNull(edgeHostName);
                 this.edgeDeviceId = Preconditions.CheckNotNull(edgeDeviceId);
                 this.useWebSockets = useWebSockets;
+                this.proxy = proxy;
                 this.usePrimaryThumbprintClientCert = false;
             }
 
@@ -143,6 +148,7 @@ namespace LeafDeviceTest
                     this.edgeHostName,
                     this.edgeDeviceId,
                     this.useWebSockets,
+                    this.proxy,
                     deviceCert,
                     this.thumbprintCerts);
             }
