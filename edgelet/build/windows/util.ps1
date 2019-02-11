@@ -29,18 +29,15 @@ function Assert-Rust
     if (-not (Test-RustUp))
     {
         Write-Host "Installing rustup and stable-x86_64-pc-windows-msvc Rust."
-        Invoke-RestMethod -usebasicparsing 'https://static.rust-lang.org/rustup/dist/i686-pc-windows-gnu/rustup-init.exe' -outfile 'rustup-init.exe'
+        Invoke-RestMethod -usebasicparsing 'https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe' -outfile 'rustup-init.exe'
         if ($LastExitCode)
         {
             Throw "Failed to download rustup with exit code $LastExitCode"
         }
 
-        Write-Host "Running rustup-init.exe"
-        ./rustup-init.exe -y --default-toolchain stable-x86_64-pc-windows-msvc >$null 2>$null
-        if ($LastExitCode)
-        {
-            Throw "Failed to install rust with exit code $LastExitCode"
-        }
+        New-Item -Type Directory -Force ~/.cargo/bin
+        Move-Item ./rustup-init.exe ~/.cargo/bin/rustup.exe
+        $env:PATH += ";$(Resolve-Path '~/.cargo/bin')"
     }
     else
     {
@@ -49,6 +46,12 @@ function Assert-Rust
         if ($LastExitCode)
         {
             Throw "Failed to install rust with exit code $LastExitCode"
+        }
+
+        rustup default stable-x86_64-pc-windows-msvc
+        if ($LastExitCode)
+        {
+            Throw "Failed to set default rust toolchain with exit code $LastExitCode"
         }
     }
 }
