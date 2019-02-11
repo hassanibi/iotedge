@@ -189,7 +189,7 @@
             ($TestName -eq "DirectMethodMqtt") -Or
             ($TestName -eq "TempFilter") -Or
             ($TestName -eq "TempFilterFunctions") -Or
-            (($ProxyUri -ne $null) -and ($TestName -in "TempSensor", "QuickstartCerts", "TransparentGateway")))
+            (($ProxyUri) -and ($TestName -in "TempSensor", "QuickstartCerts", "TransparentGateway")))
         {
             Switch -Regex ($TestName)
             {
@@ -242,7 +242,7 @@
             (Get-Content $DeploymentWorkingFilePath).replace('<CR.Password>',$ContainerRegistryPassword) | Set-Content $DeploymentWorkingFilePath
             (Get-Content $DeploymentWorkingFilePath).replace('-linux-','-windows-') | Set-Content $DeploymentWorkingFilePath
     
-            If ($ProxyUri -ne $null)
+            If ($ProxyUri)
             {
                 # Add/remove/edit JSON values *after* replacing all the '<>' placeholders because
                 # ConvertTo-Json will encode angle brackets.
@@ -412,7 +412,7 @@
                 -p `"$ContainerRegistryPassword`" --verify-data-from-module `"DirectMethodSender`" ``
                 -t `"${ReleaseArtifactImageBuildNumber}-windows-$(GetImageArchitectureLabel)`" ``
                 -l `"$DeploymentWorkingFilePath`""
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand ``
                 --upstream-protocol 'AmqpWs' ``
                 --proxy `"$ProxyUri`""
@@ -443,7 +443,7 @@
                 -p `"$ContainerRegistryPassword`" --verify-data-from-module `"DirectMethodSender`" ``
                 -t `"${ReleaseArtifactImageBuildNumber}-windows-$(GetImageArchitectureLabel)`" ``
                 -l `"$DeploymentWorkingFilePath`""
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand ``
                 --upstream-protocol 'MqttWs' ``
                 --proxy `"$ProxyUri`""
@@ -475,11 +475,11 @@
             -p `"$ContainerRegistryPassword`" ``
             --optimize_for_performance true ``
             -t `"${ReleaseArtifactImageBuildNumber}-windows-$(GetImageArchitectureLabel)`" ``
-            -l `"$DeploymentWorkingFilePath`" ``
             --leave-running=All ``
             --no-verify"
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand ``
+                -l `"$DeploymentWorkingFilePath`" ``
                 --upstream-protocol 'AmqpWs' ``
                 --proxy `"$ProxyUri`""
         }
@@ -496,7 +496,7 @@
             -e `"$EventHubConnectionString`" ``
             -ct `"$caCertPath`" ``
             -ed `"$env:computername`""
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand --proxy `"$ProxyUri`""
         }
         Invoke-Expression $testCommand | Out-Host
@@ -524,7 +524,7 @@
                 -p `"$ContainerRegistryPassword`" --verify-data-from-module `"tempFilter`" ``
                 -t `"${ReleaseArtifactImageBuildNumber}-windows-$(GetImageArchitectureLabel)`" ``
                 -l `"$DeploymentWorkingFilePath`""
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand ``
                 --upstream-protocol 'AmqpWs' ``
                 --proxy `"$ProxyUri`""
@@ -561,7 +561,7 @@
                 -p `"$ContainerRegistryPassword`" --verify-data-from-module `"tempFilterFunctions`" ``
                 -t `"${ReleaseArtifactImageBuildNumber}-windows-$(GetImageArchitectureLabel)`" ``
                 -l `"$DeploymentWorkingFilePath`""
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand ``
                 --upstream-protocol 'AmqpWs' ``
                 --proxy `"$ProxyUri`""
@@ -592,10 +592,10 @@
             -p `"$ContainerRegistryPassword`" ``
             --optimize_for_performance true ``
             -t `"${ReleaseArtifactImageBuildNumber}-windows-$(GetImageArchitectureLabel)`" ``
-            -l `"$DeploymentWorkingFilePath`" ``
             -tw `"$TwinTestFileArtifactFilePath`""
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand ``
+                -l `"$DeploymentWorkingFilePath`" ``
                 --upstream-protocol 'AmqpWs' ``
                 --proxy `"$ProxyUri`""
         }
@@ -626,14 +626,14 @@
             -p `"$ContainerRegistryPassword`" ``
             --optimize_for_performance true ``
             -t `"${ReleaseArtifactImageBuildNumber}-windows-$(GetImageArchitectureLabel)`" ``
-            -l `"$DeploymentWorkingFilePath`" ``
             --leave-running=All ``
             --no-verify ``
             --device_ca_cert `"$DeviceCACertificatePath`" ``
             --device_ca_pk `"$DeviceCAPrimaryKeyPath`" ``
             --trusted_ca_certs `"$TrustedCACertificatePath`""
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand ``
+                -l `"$DeploymentWorkingFilePath`" ``
                 --upstream-protocol 'AmqpWs' ``
                 --proxy `"$ProxyUri`""
         }
@@ -647,7 +647,7 @@
             -e `"$EventHubConnectionString`" ``
             -ct `"$TrustedCACertificatePath`" ``
             -ed `"$env:computername`""
-        If ($ProxyUri -ne $null) {
+        If ($ProxyUri) {
             $testCommand = "$testCommand --proxy `"$ProxyUri`""
         }
         Invoke-Expression $testCommand | Out-Host
@@ -705,7 +705,10 @@
     
         If (($TestName -eq "QuickstartCerts") -Or ($TestName -eq "TransparentGateway"))
         {
-            $validatingItems += $RuntimeOnlyDeploymentArtifactFilePath
+            if ($ProxyUri)
+            {
+                $validatingItems += $RuntimeOnlyDeploymentArtifactFilePath
+            }
             $validatingItems += (Join-Path $LeafDeviceArtifactFolder "*")
         }
 
@@ -721,7 +724,10 @@
     
         If ($TestName -eq "TempSensor")
         {
-            $validatingItems += $QuickstartDeploymentArtifactFilePath
+            if ($ProxyUri)
+            {
+                $validatingItems += $QuickstartDeploymentArtifactFilePath
+            }
             $validatingItems += $TwinTestFileArtifactFilePath
         }
     
