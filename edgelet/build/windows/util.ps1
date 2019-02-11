@@ -36,7 +36,7 @@ function Assert-Rust
         }
 
         Write-Host "Running rustup.exe"
-        ./rustup-init.exe -y --default-toolchain stable-x86_64-pc-windows-msvc
+        ./rustup-init.exe -y --default-toolchain stable-x86_64-pc-windows-msvc 2>&1
         if ($LastExitCode)
         {
             Throw "Failed to install rust with exit code $LastExitCode"
